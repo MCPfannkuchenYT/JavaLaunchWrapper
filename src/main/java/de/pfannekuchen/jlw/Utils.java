@@ -1,14 +1,14 @@
 package de.pfannekuchen.jlw;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
-
-import net.lingala.zip4j.ZipFile;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * All sorts of things
@@ -43,12 +43,58 @@ public final class Utils {
 	/**
 	 * Used to quickly download and Unzip a ZIP Archive
 	 */
-	public static final void downloadZip(final String url, final String destination) throws MalformedURLException, IOException {
+	public static final void downloadZip(final String url, final String destination) throws Exception {
 		final File temporaryFile = File.createTempFile("jvmdownload", ".zip");
 		temporaryFile.deleteOnExit();
 		copyURLToFile(new URL(url), temporaryFile);
-		ZipFile zipFile = new ZipFile(temporaryFile);
-		zipFile.extractAll(destination);
+		unzipFile(temporaryFile.getAbsolutePath(), new File(destination));
+		//ZipFile zipFile = new ZipFile(temporaryFile);
+		//zipFile.extractAll(destination);
+	}
+	
+	public static final void unzipFile(final String fileZip, final File destDir) throws Exception {
+		byte[] buffer = new byte[1024];
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip))) {
+			ZipEntry zipEntry = zis.getNextEntry();
+			while (zipEntry != null) {
+				File newFile = newFile(destDir, zipEntry);
+			    if (zipEntry.isDirectory()) {
+			        if (!newFile.isDirectory() && !newFile.mkdirs()) {
+			            throw new IOException("Failed to create directory " + newFile);
+			        }
+			    } else {
+			        // fix for Windows-created archives
+			        File parent = newFile.getParentFile();
+			        if (!parent.isDirectory() && !parent.mkdirs()) {
+			            throw new IOException("Failed to create directory " + parent);
+			        }
+			        
+			        // write file content
+			        FileOutputStream fos = new FileOutputStream(newFile);
+			        int len;
+			        while ((len = zis.read(buffer)) > 0) {
+			            fos.write(buffer, 0, len);
+			        }
+			        fos.close();
+			    }
+			zipEntry = zis.getNextEntry();
+			}
+			zis.closeEntry();
+			zis.close();
+		}
+	}
+	
+	private static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
+	    File destFile = new File(destinationDir, zipEntry.getName());
+
+	    String destDirPath = destinationDir.getCanonicalPath();
+	    String destFilePath = destFile.getCanonicalPath();
+
+	    if (!destFilePath.startsWith(destDirPath + File.separator)) {
+	        throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
+	    }
+
+	    return destFile;
 	}
 	
 	/**

@@ -4,26 +4,8 @@ plugins {
 
 sourceCompatibility = targetCompatibility = "1.8";
 
-// Export Group
-configurations {
-	include
-	implementation.extendsFrom(include)
-}
-
-repositories {
-	mavenCentral()
-}
-
-dependencies {
-	// Dependency for un-zipping compressed archives
-	include group: 'net.lingala.zip4j', name: 'zip4j', version: '2.8.0'
-}
-
 jar {
     manifest {
         attributes 'Main-Class': 'de.pfannekuchen.jlw.JavaLaunchWrapper'
     }
-   	from {
-    	configurations.include.collect { it.isDirectory() ? it : zipTree(it) }
-	}
 }
