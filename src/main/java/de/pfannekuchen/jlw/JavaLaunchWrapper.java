@@ -7,9 +7,7 @@ import java.util.Properties;
 
 import javax.swing.JOptionPane;
 
-import org.apache.commons.io.FileUtils;
-
-import de.pfannekuchen.jlw.Util.OS;
+import de.pfannekuchen.jlw.Utils.OS;
 
 public class JavaLaunchWrapper {
 
@@ -22,6 +20,9 @@ public class JavaLaunchWrapper {
 		}
 	}
 	
+	/**
+	 * Try to Update and Launch the Program
+	 */
 	static final void start() throws Exception {
 		final Properties properties = new Properties();
 		/* Try loading the Properties from the Config File */
@@ -29,22 +30,24 @@ public class JavaLaunchWrapper {
 			properties.load(stream);
 			stream.close();
 		}
-		final String JVM = properties.getProperty(Util.getOS().name());
+		final String JVM = properties.getProperty(Utils.getOS().name());
 		final String NAME = properties.getProperty("name");
-		final String destination = ((Util.getOS() == OS.WINDOWS) ? (System.getenv("AppData") + "/" + NAME + "-JVM") : (System.getProperty("user.name") + "/" + NAME + "-JVM"));
+		final String destination = ((Utils.getOS() == OS.WINDOWS) ? (System.getenv("AppData") + "/" + NAME + "-JVM") : (System.getProperty("user.name") + "/" + NAME + "-JVM"));
+		/* Download JVM if non-existant */
 		if (!new File(destination).exists()) {
 			final Thread t = new Thread(() -> {
 				JOptionPane.showConfirmDialog(null, "Since this is the first launch\n a few Files will be downloaded. \nThis shouldn't take to long...", "Thank you for installing " + NAME, JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE);
 			});
 			t.setDaemon(true);
 			t.start();
-			Util.downloadZip(JVM, destination);
+			Utils.downloadZip(JVM, destination);
 			t.interrupt();
 		}
+		/* Download and Run the Jar File */
 		final File jarFile = new File(destination + "/app.jar");
 		if (jarFile.exists()) jarFile.delete();
-		FileUtils.copyURLToFile(new URL(properties.getProperty("jar")), jarFile);
-		final ProcessBuilder builder = new ProcessBuilder(destination + "/bin/java" + (Util.getOS() == OS.WINDOWS ? ".exe" : ""), "-cp", jarFile.getAbsolutePath(), (String) properties.get("entry"));
+		Utils.copyURLToFile(new URL(properties.getProperty("jar")), jarFile);
+		final ProcessBuilder builder = new ProcessBuilder(destination + "/bin/java" + (Utils.getOS() == OS.WINDOWS ? ".exe" : ""), "-cp", jarFile.getAbsolutePath(), (String) properties.get("entry"));
 		builder.inheritIO();
 		builder.start();
 	}

@@ -2,7 +2,13 @@ plugins {
     id 'java-library'
 }
 
-sourceCompatibility = targetCompatibility = "1.16";
+sourceCompatibility = targetCompatibility = "1.8";
+
+// Export Group
+configurations {
+	include
+	implementation.extendsFrom(include)
+}
 
 repositories {
 	mavenCentral()
@@ -10,7 +16,14 @@ repositories {
 
 dependencies {
 	// Dependency for un-zipping compressed archives
-	implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.8.0'
-	// Dependency for quickly download over https
-	implementation group: 'commons-io', name: 'commons-io', version: '2.9.0'
+	include group: 'net.lingala.zip4j', name: 'zip4j', version: '2.8.0'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'de.pfannekuchen.jlw.JavaLaunchWrapper'
+    }
+   	from {
+    	configurations.include.collect { it.isDirectory() ? it : zipTree(it) }
+	}
 }
