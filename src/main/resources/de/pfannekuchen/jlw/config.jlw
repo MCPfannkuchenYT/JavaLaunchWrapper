@@ -1,0 +1,9 @@
+# Specify different JVMs for different Operating Systems
+WINDOWS=https://mgnet.work/JDK16-WIN.zip
+LINUX=https://mgnet.work/JDK16-UNIX.zip
+MACOS=https://mgnet.work/JDK16-MACOS.zip
+# Download Link for Jar and Main Class
+entry=your.main.Class
+jar=linkToJar.de/lol.jar
+# Name
+name=YourApp
