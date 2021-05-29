@@ -48,8 +48,6 @@ public final class Utils {
 		temporaryFile.deleteOnExit();
 		copyURLToFile(new URL(url), temporaryFile);
 		unzipFile(temporaryFile.getAbsolutePath(), new File(destination));
-		//ZipFile zipFile = new ZipFile(temporaryFile);
-		//zipFile.extractAll(destination);
 	}
 	
 	public static final void unzipFile(final String fileZip, final File destDir) throws Exception {
