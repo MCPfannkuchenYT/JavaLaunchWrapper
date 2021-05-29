@@ -1,3 +1,4 @@
+# Archived because I use JPackage and JLink now!
 # JavaLaunchWrapper
 Java Launch Wrapper is a very small and lightweight Launcher for your Java Applications.
 
